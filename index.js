@@ -1,0 +1,43 @@
+const express = require("express");
+const axios = require("axios");
+
+const app = express();
+app.use(express.json());
+
+// rota de teste (healthcheck)
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Middleware Recintos ativo"
+  });
+});
+
+// rota que o Bubble vai chamar
+app.post("/recintos/empresa", async (req, res) => {
+  try {
+    const { cnpj } = req.body;
+
+    if (!cnpj) {
+      return res.status(400).json({ error: "CNPJ é obrigatório" });
+    }
+
+    // 🔴 SIMULAÇÃO por enquanto
+    // aqui no futuro entra a chamada real para a Receita
+    const respostaSimulada = {
+      cnpj,
+      razaoSocial: "EMPRESA TESTE LTDA",
+      situacao: "ATIVA",
+      ambiente: "SIMULACAO"
+    };
+
+    return res.json(respostaSimulada);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Erro interno no middleware" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Middleware rodando na porta ${PORT}`);
+});
