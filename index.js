@@ -53,13 +53,12 @@ app.post("/recintos/evento", async (req, res) => {
     const cpf = motorista?.cpf;
     const codigo_recinto = recinto?.codigo;
 
-    if (!placa || !codigo_recinto || !tipo_evento) {
-      return res.status(400).json({
-        status: "erro",
-        message: "Campos obrigatórios não informados",
-        recebido: req.body
-      });
-    }
+if (!req.body || Object.keys(req.body).length === 0) {
+  return res.json({
+    status: "ok",
+    message: "Initialize call do Bubble"
+  });
+}
 
     console.log("Evento recebido do Bubble:", req.body);
 
