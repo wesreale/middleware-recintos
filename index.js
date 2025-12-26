@@ -42,29 +42,38 @@ const PORT = process.env.PORT || 3000;
 app.post("/recintos/evento", async (req, res) => {
   try {
     const {
-      placa,
-      cpf,
-      codigo_recinto,
       tipo_evento,
-      data_evento
+      data_evento,
+      recinto,
+      veiculo,
+      motorista
     } = req.body;
 
-    // validação básica
+    const placa = veiculo?.placa;
+    const cpf = motorista?.cpf;
+    const codigo_recinto = recinto?.codigo;
+
     if (!placa || !codigo_recinto || !tipo_evento) {
       return res.status(400).json({
         status: "erro",
-        message: "Campos obrigatórios não informados"
+        message: "Campos obrigatórios não informados",
+        recebido: req.body
       });
     }
 
     console.log("Evento recebido do Bubble:", req.body);
 
-    // por enquanto só devolvemos sucesso
     return res.json({
       status: "ok",
       message: "Evento recebido com sucesso",
       recebido_em: new Date(),
-      dados: req.body
+      dados: {
+        tipo_evento,
+        data_evento,
+        placa,
+        cpf,
+        codigo_recinto
+      }
     });
 
   } catch (error) {
@@ -75,7 +84,6 @@ app.post("/recintos/evento", async (req, res) => {
     });
   }
 });
-
 app.listen(PORT, () => {
   console.log(`Middleware rodando na porta ${PORT}`);
 });
