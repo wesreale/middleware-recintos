@@ -38,6 +38,44 @@ app.post("/recintos/empresa", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+// rota para receber eventos do Bubble
+app.post("/recintos/evento", async (req, res) => {
+  try {
+    const {
+      placa,
+      cpf,
+      codigo_recinto,
+      tipo_evento,
+      data_evento
+    } = req.body;
+
+    // validação básica
+    if (!placa || !codigo_recinto || !tipo_evento) {
+      return res.status(400).json({
+        status: "erro",
+        message: "Campos obrigatórios não informados"
+      });
+    }
+
+    console.log("Evento recebido do Bubble:", req.body);
+
+    // por enquanto só devolvemos sucesso
+    return res.json({
+      status: "ok",
+      message: "Evento recebido com sucesso",
+      recebido_em: new Date(),
+      dados: req.body
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "erro",
+      message: "Erro interno no middleware"
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Middleware rodando na porta ${PORT}`);
 });
