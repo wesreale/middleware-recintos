@@ -4,7 +4,7 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-// rota de teste (healthcheck)
+// healthcheck
 app.get("/", (req, res) => {
   res.json({
     status: "OK",
@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
   });
 });
 
-// rota que o Bubble vai chamar
+// simulação empresa
 app.post("/recintos/empresa", async (req, res) => {
   try {
     const { cnpj } = req.body;
@@ -21,26 +21,30 @@ app.post("/recintos/empresa", async (req, res) => {
       return res.status(400).json({ error: "CNPJ é obrigatório" });
     }
 
-    // 🔴 SIMULAÇÃO por enquanto
-    // aqui no futuro entra a chamada real para a Receita
-    const respostaSimulada = {
+    return res.json({
       cnpj,
       razaoSocial: "EMPRESA TESTE LTDA",
       situacao: "ATIVA",
       ambiente: "SIMULACAO"
-    };
+    });
 
-    return res.json(respostaSimulada);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Erro interno no middleware" });
+    return res.status(500).json({ error: "Erro interno" });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-// rota para receber eventos do Bubble
+// eventos recintos
 app.post("/recintos/evento", async (req, res) => {
   try {
+
+    // 👉 permite Initialize call do Bubble
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.json({
+        status: "ok",
+        message: "Initialize call do Bubble"
+      });
+    }
+
     const {
       tipo_evento,
       data_evento,
@@ -53,14 +57,16 @@ app.post("/recintos/evento", async (req, res) => {
     const cpf = motorista?.cpf;
     const codigo_recinto = recinto?.codigo;
 
-if (!req.body || Object.keys(req.body).length === 0) {
-  return res.json({
-    status: "ok",
-    message: "Initialize call do Bubble"
-  });
-}
+    // 👉 validação REAL
+    if (!placa || !codigo_recinto || !tipo_evento) {
+      return res.status(400).json({
+        status: "erro",
+        message: "Campos obrigatórios não informados",
+        recebido: req.body
+      });
+    }
 
-    console.log("Evento recebido do Bubble:", req.body);
+    console.log("Evento recebido:", req.body);
 
     return res.json({
       status: "ok",
@@ -83,6 +89,8 @@ if (!req.body || Object.keys(req.body).length === 0) {
     });
   }
 });
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Middleware rodando na porta ${PORT}`);
 });
